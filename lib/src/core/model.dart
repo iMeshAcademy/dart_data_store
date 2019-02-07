@@ -34,7 +34,7 @@ abstract class Model {
   List<String> getFields();
 
   void parseConfig() {
-    if (config.keys.contains("values")) {
+    if (null != config && config.keys.contains("values")) {
       Map<String, dynamic> values = config["values"];
       values.forEach((str, val) {
         if (this.getFields().contains(str)) {
@@ -50,7 +50,7 @@ abstract class Model {
     }
   }
 
-  void save() async {
+  void save() {
     if (isModified) {
       var store = StoreFactory().get(modelName);
       if (key.length > 0) {

@@ -88,6 +88,10 @@ abstract class Store<T extends Model> extends EventEmitter {
         });
       }
       parseConfigInternal(); // Call the derived class method so that it can implement the service.
+
+      if (this.modelName == null || this.modelName.isEmpty) {
+        throw new ArgumentError.notNull(this.modelName);
+      }
     } // null != config;
   }
 
