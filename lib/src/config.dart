@@ -4,10 +4,12 @@ part of dart_store;
 // BSD-style license that can be found in the LICENSE file.
 
 /// Callback function for store generator.
-typedef Store StoreGeneratorFunction(Map<String, Object> config);
+typedef Store StoreGeneratorFunction(
+    String storeName, Map<String, Object> config);
 
 /// Callback function for model generator.
-typedef Model ModelGeneratorFunction(Map<String, Object> config);
+typedef Model ModelGeneratorFunction(
+    String modelName, Map<String, Object> config);
 
 ///
 /// Default configuration class for framework.
@@ -51,7 +53,7 @@ class Config {
                   val["generator"] as StoreGeneratorFunction;
               this._storeGenerators[str] = fn;
               // Attach to StoreFactory. The generator should be a valid callback function.
-              StoreFactory().attach(str, (val["config"]));
+              StoreFactory().attach(str, fn(str, val["config"]));
             });
           }
         }

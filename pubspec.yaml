@@ -1,7 +1,7 @@
 name: dart_store
 description: Simple, evented data-store framework for dart, which support event driven development.
 
-version: 0.1.3
+version: 0.1.4
 
 environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"

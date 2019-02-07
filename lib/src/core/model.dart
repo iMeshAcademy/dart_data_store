@@ -38,9 +38,10 @@ abstract class Model {
       Map<String, dynamic> values = config["values"];
       values.forEach((str, val) {
         if (this.getFields().contains(str)) {
-          this._values[str] = val;
           if (str == idField) {
             this.key = val;
+          } else {
+            setValue(str, val); // Set value using the defined API.
           }
         } else {
           print("invalid field received in config");
@@ -83,16 +84,18 @@ abstract class Model {
 
   List<String> get fields => this.getFields();
   bool performSanity(String key, dynamic value);
-  dynamic getValue(String key) =>
-      this._values.containsKey(key) ? this._values[key] : null;
+  dynamic getValue(String key) => key == idField
+      ? this.key
+      : this._values.containsKey(key) ? this._values[key] : null;
   void setValue(String key, dynamic value) {
-    if (this.fields.contains(key)) {
-      if (key == idField) {
-        this.key = value;
+    if (key == idField) {
+      this.key = value;
+    } else if (this.fields.contains(key)) {
+      if (performSanity(key, value)) {
+        this._values[key] = value;
       } else {
-        if (performSanity(key, value)) {
-          this._values[key] = value;
-        }
+        throw new ArgumentError(
+            "Failed perform sanity check on $key with value - $value");
       }
     } else {
       throw new ArgumentError(

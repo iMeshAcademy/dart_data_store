@@ -30,6 +30,6 @@ class ModelFactory {
 
   /// Create a model from the configurator
   Model createModel(String modelName, Map<String, Object> configs) {
-    return this._modelGenerator[modelName](configs) ?? null;
+    return this._modelGenerator[modelName](modelName, configs) ?? null;
   }
 }

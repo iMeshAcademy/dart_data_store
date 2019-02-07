@@ -1,3 +1,10 @@
+# 0.1.4
+- Setting/getting key independent of fields. 
+- Key would be set or get whether it is defined in fields for the model.
+- Updated the parser to use new API to set value to model.
+- Updated model and store generators to accept model/store name respectively.
+- Store generator map should contain config for store generation also, this is a mandatory field. Refer example section for how to pass config to store while creating it.
+
 # 0.1.3
 - Setting up ID/Key value was changing the id field.
 - Provided a setValue API to set values in the value configuration.
