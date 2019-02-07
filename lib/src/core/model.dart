@@ -20,12 +20,12 @@ abstract class Model {
   /// @modelName - String, name of the model.
   /// @config - Configuration for the model.
   /// Configuration for model. This could take the following form
-  ///   {
-  ///     "values"  : {
+  ///
+  ///                {
   ///                   "field1"  : "value1",
   ///                   "field2"  : "value2"
   ///                 }
-  ///   }
+  ///
   ///
   Model({@required this.modelName, @required this.config}) {
     parseConfig();
@@ -34,9 +34,8 @@ abstract class Model {
   List<String> getFields();
 
   void parseConfig() {
-    if (null != config && config.keys.contains("values")) {
-      Map<String, dynamic> values = config["values"];
-      values.forEach((str, val) {
+    if (null != config) {
+      config.forEach((str, val) {
         if (this.getFields().contains(str)) {
           if (str == idField) {
             this.key = val;
@@ -52,7 +51,7 @@ abstract class Model {
 
   void save() {
     if (isModified) {
-      var store = StoreFactory().get(modelName);
+      var store = StoreFactory().getByModel(modelName);
       if (key.length > 0) {
         store.update(this);
       } else {
@@ -72,7 +71,7 @@ abstract class Model {
    * It is not possible to set a different ID once the ID filed is initlaized and valid.
    */
   set key(String value) {
-    if (this.values[idField].trim().length > 0) {
+    if (key != null && key.trim().length > 0) {
       return;
     }
 

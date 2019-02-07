@@ -46,7 +46,7 @@ class Config {
         _parseStores(storeCfgs) {
           if (null != storeCfgs) {
             Map<String, Map<String, dynamic>> cfgs =
-                config as Map<String, Map<String, dynamic>>;
+                storeCfgs as Map<String, Map<String, dynamic>>;
 
             cfgs.forEach((str, val) {
               StoreGeneratorFunction fn =
@@ -62,7 +62,7 @@ class Config {
         _parseModels(modelCfgs) {
           if (null != modelCfgs) {
             Map<String, Map<String, dynamic>> cfgs =
-                config as Map<String, Map<String, dynamic>>;
+                modelCfgs as Map<String, Map<String, dynamic>>;
 
             cfgs.forEach((str, val) {
               ModelGeneratorFunction fn =

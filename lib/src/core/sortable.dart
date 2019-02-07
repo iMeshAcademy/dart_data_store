@@ -22,7 +22,8 @@ mixin Sortable<T extends Model> {
   /// Sorter can be a sort configuration, understood by the implementation or a callback function.
   /// If callback function is specified, that function shall be used as a comparer by the implementer.
   @protected
-  void applySorter(List<T> records, dynamic sorter, [bool fireEvent = true]) {
+  void applySorter(List<T> records, dynamic sorter,
+      [bool fireEvent = true, bool force = false]) {
     if (null == records) {
       return; // Either already sorted, or no need to sort the list.
     }
@@ -56,6 +57,7 @@ mixin Sortable<T extends Model> {
   ///
   @protected
   void sortList(List<T> recs) {
+    print("Inside sortList");
     if (hasSorters == false || null == recs) {
       return;
     }
@@ -72,7 +74,6 @@ mixin Sortable<T extends Model> {
           dynamic val1 = a.getValue(sorter["property"]);
           dynamic val2 = b.getValue(sorter["property"]);
 
-          print("Val1 - $val1, val2 - $val2");
           Function comparer = sorter["comparer"];
           if (caseSensitive && val1 is String) {
             val1 = (val1 as String).toLowerCase();
@@ -85,15 +86,12 @@ mixin Sortable<T extends Model> {
           if (direction != "asc") {
             sort *= -1;
           }
-
-          print("sort after comparer - $sort");
         }
 
         if (sort != 0) {
           break;
         }
       }
-      print("sort returnig fuction - $sort");
 
       return sort;
     });

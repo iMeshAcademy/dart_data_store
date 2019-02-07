@@ -38,6 +38,13 @@ class StoreFactory {
     this._stores.clear();
   }
 
+  Store getByModel(String modelName) {
+    return this
+        ._stores
+        .values
+        .firstWhere((item) => item.modelName == modelName);
+  }
+
   /// Get the store using the model name.
   Store get(String storeName) =>
       this._stores.containsKey(storeName) ? this._stores[storeName] : null;

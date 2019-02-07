@@ -160,7 +160,7 @@ abstract class Store<T extends Model> extends EventEmitter {
       performLoad((data, error) {
         sort(null, false);
         filter(null, false);
-        if (data) {
+        if (data != null) {
           emit("load", this, data);
         } else {
           emit("error", this,
@@ -172,6 +172,12 @@ abstract class Store<T extends Model> extends EventEmitter {
           new DatabaseError("load", "Failed to load data", null));
       return; // Load failed for some reason, return empty list.
     }
+  }
+
+  Future loadAsync() {
+    return new Future(() {
+      return this.load();
+    });
   }
 
   /// API to add a record.
@@ -189,6 +195,12 @@ abstract class Store<T extends Model> extends EventEmitter {
     });
   }
 
+  Future addAsync(Model record) {
+    return new Future(() {
+      return add(record);
+    });
+  }
+
   /// Remove record from store.
   /// This removes record from database, then from store.
   void remove(Model record) {
@@ -199,6 +211,12 @@ abstract class Store<T extends Model> extends EventEmitter {
         emit("error", this,
             new DatabaseError("remove", "Failed to remove record.", record));
       }
+    });
+  }
+
+  Future removeAsync(Model record) {
+    return new Future(() {
+      return remove(record);
     });
   }
 
@@ -217,17 +235,29 @@ abstract class Store<T extends Model> extends EventEmitter {
     });
   }
 
+  Future removeAllAsync() {
+    return new Future(() {
+      return removeAll();
+    });
+  }
+
   /// Update a record to store.
   void update(Model record) {
     performUpdate(record, (result, error) {
       if ((result as int) > 0) {
-        sort(null, false);
-        filter(null, false);
+        sort(null, false, true);
+        filter(null, false, true);
         emit("update", this, record);
       } else {
         emit("error", this,
             new DatabaseError("update", "Failed to update data", record));
       }
+    });
+  }
+
+  Future updateAsync(Model record) {
+    return new Future(() {
+      return update(record);
     });
   }
 
@@ -247,9 +277,15 @@ abstract class Store<T extends Model> extends EventEmitter {
     });
   }
 
-  void filter([dynamic config, bool fireEvent = true]);
+  Future commitAsync() {
+    return new Future(() {
+      return commit();
+    });
+  }
 
-  void sort([dynamic config, bool fireEvent = true]);
+  void filter([dynamic config, bool fireEvent = true, bool force = false]);
+
+  void sort([dynamic config, bool fireEvent = true, bool force = false]);
 
   @protected
   void performAdd(Model record, DatabaseOperationCallback callback);

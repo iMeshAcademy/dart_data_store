@@ -25,15 +25,15 @@ mixin Filterable<T extends Model> {
     this._filteredList_ = new _CacheControl(cached);
   }
 
-  void doFilter([dynamic config, bool notify = false]) {
+  void doFilter([dynamic config, bool notify = false, bool force = false]) {
     if (this._suspendFilters) {
       return;
     }
-    applyFilter(config, notify);
+    applyFilter(config, notify, force);
   }
 
-  filterBy([FilterCallback callback, bool notify = false]) {
-    doFilter(callback);
+  filterBy([FilterCallback callback, bool notify = false, bool force]) {
+    doFilter(callback, notify, force);
   }
 
   /// This function provide mechanism to filter store entries.
@@ -45,9 +45,6 @@ mixin Filterable<T extends Model> {
       // Collection is not cached, so no records to perform filter.
       return;
     }
-
-    print("Inside apply filter!");
-
     // Sanity check the new filter.
     if (null == filter) {
       if (filtered && false == bForce) {
@@ -69,7 +66,7 @@ mixin Filterable<T extends Model> {
 
     this.performFilter(records, (data, error) {
       this.filteredRecords(data);
-      this._filtered = this.filteredRecords.records.length > 0;
+      this._filtered = true;
       // Emit filter event if it is required in the current operation context.
       if (fireEvent) onFiltered();
     });

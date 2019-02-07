@@ -67,8 +67,8 @@ class MemoryStore<T extends Model> extends Store<T>
   }
 
   @override
-  void filter([dynamic config, bool fireEvent = true]) {
-    doFilter(config, fireEvent);
+  void filter([dynamic config, bool fireEvent = true, bool force]) {
+    doFilter(config, fireEvent, force);
   }
 
   @override
@@ -103,8 +103,8 @@ class MemoryStore<T extends Model> extends Store<T>
   }
 
   @override
-  void sort([dynamic config, bool fireEvent = true]) {
-    super.applySorter(records, config, fireEvent);
+  void sort([dynamic config, bool fireEvent = true, bool force]) {
+    super.applySorter(records, config, fireEvent, force);
   }
 
   @override
