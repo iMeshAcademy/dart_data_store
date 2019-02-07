@@ -68,7 +68,7 @@ class MemoryStore<T extends Model> extends Store<T>
 
   @override
   void filter([dynamic config, bool fireEvent = true, bool force]) {
-    doFilter(config, fireEvent, force);
+    filterBy(config, fireEvent, force);
   }
 
   @override

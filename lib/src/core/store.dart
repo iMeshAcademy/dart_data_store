@@ -2,7 +2,7 @@ part of dart_store;
 
 // Copyright (c) 2019, iMeshAcademy authors.  Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
-// BSD-style license that can be found in the LICENSE file.
+// MIT-style license that can be found in the LICENSE file.
 
 ///
 /// Abstract class, which provides default store implementation.
@@ -195,6 +195,7 @@ abstract class Store<T extends Model> extends EventEmitter {
     });
   }
 
+  /// Async API for add.
   Future addAsync(Model record) {
     return new Future(() {
       return add(record);
@@ -214,6 +215,7 @@ abstract class Store<T extends Model> extends EventEmitter {
     });
   }
 
+  /// Async API for remove.
   Future removeAsync(Model record) {
     return new Future(() {
       return remove(record);
@@ -235,6 +237,7 @@ abstract class Store<T extends Model> extends EventEmitter {
     });
   }
 
+  ///Async API for removeAll
   Future removeAllAsync() {
     return new Future(() {
       return removeAll();
@@ -255,6 +258,7 @@ abstract class Store<T extends Model> extends EventEmitter {
     });
   }
 
+  /// Async API for update.
   Future updateAsync(Model record) {
     return new Future(() {
       return update(record);
@@ -277,6 +281,7 @@ abstract class Store<T extends Model> extends EventEmitter {
     });
   }
 
+  /// Async API for commit.
   Future commitAsync() {
     return new Future(() {
       return commit();

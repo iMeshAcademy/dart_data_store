@@ -2,7 +2,7 @@ part of dart_store;
 
 // Copyright (c) 2019, iMeshAcademy authors.  Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
-// BSD-style license that can be found in the LICENSE file.
+// MIT-style license that can be found in the LICENSE file.
 
 abstract class Model {
   final String modelName;
@@ -31,12 +31,11 @@ abstract class Model {
     parseConfig();
   }
 
-  List<String> getFields();
-
+  /// Parse model configuration.
   void parseConfig() {
     if (null != config) {
       config.forEach((str, val) {
-        if (this.getFields().contains(str)) {
+        if (this.fields.contains(str)) {
           if (str == idField) {
             this.key = val;
           } else {
@@ -49,6 +48,7 @@ abstract class Model {
     }
   }
 
+  /// Routine to perform save operation.
   void save() {
     if (isModified) {
       var store = StoreFactory().getByModel(modelName);
@@ -60,16 +60,14 @@ abstract class Model {
     }
   }
 
+  /// Get the ID field associated with the model.
   String getIdField() => Model.idField;
-  /**
-   * Retrieve the unique key or id field for the model.
-   */
+
+  /// Retrieve the unique key or id field for the model.
   String get key => this._values[idField];
 
-  /**
-   * Try to set the unique ID field or key for the model.
-   * It is not possible to set a different ID once the ID filed is initlaized and valid.
-   */
+  /// Try to set the unique ID field or key for the model.
+  /// It is not possible to set a different ID once the ID filed is initlaized and valid.
   set key(String value) {
     if (key != null && key.trim().length > 0) {
       return;
@@ -78,14 +76,25 @@ abstract class Model {
     this.values[idField] = value;
   }
 
+  /// Abstract API to convert the model to json.
   Map<String, Object> toJson();
+
+  /// Get the values in the map.
   Map<String, dynamic> get values => this._values;
 
-  List<String> get fields => this.getFields();
+  /// Getter to get fields.
+  List<String> get fields;
+
+  /// Abstract API to perform sanity check of input fields.
   bool performSanity(String key, dynamic value);
+
+  /// Get value of an element for the model.
   dynamic getValue(String key) => key == idField
       ? this.key
       : this._values.containsKey(key) ? this._values[key] : null;
+
+  /// Update field value.
+  /// [performSanity] will be used to check if input values are valid.
   void setValue(String key, dynamic value) {
     if (key == idField) {
       this.key = value;

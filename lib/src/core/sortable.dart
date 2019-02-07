@@ -57,10 +57,15 @@ mixin Sortable<T extends Model> {
   ///
   @protected
   void sortList(List<T> recs) {
-    print("Inside sortList");
+    // Sorting is suspended, return.
+    if (this._suspended) {
+      return;
+    }
+
     if (hasSorters == false || null == recs) {
       return;
     }
+
     recs.sort((a, b) {
       int sort = 0;
       for (var i = 0; i < this.sorters.length; i++) {
@@ -109,6 +114,7 @@ mixin Sortable<T extends Model> {
   @protected
   void performSort(List<T> records, DatabaseOperationCallback callback) {
     if (this._suspended) {
+      callback(null, "Could not perform sort as it is suspended.");
       return;
     }
     sortList(records);
@@ -125,7 +131,11 @@ mixin Sortable<T extends Model> {
     this._suspended = false;
   }
 
-  void removeSorter() {}
+  void removeSorter() {
+    throw new UnsupportedError("This API is not supported in this version.");
+  }
 
-  void clearSorters() {}
+  void clearSorters() {
+    throw new UnsupportedError("This API is not supported in this version.");
+  }
 }
