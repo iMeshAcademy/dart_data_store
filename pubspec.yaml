@@ -3,10 +3,18 @@ description: Simple, evented data-store framework for dart, which support event 
 
 version: 0.1.4
 
+authors:
+- Ajeesh B Nair <ajeeshklr@gmail.com>
+- iMeshAcademy <imeshconnect@gmail.com>
+
+homepage: "https://github.com/iMeshAcademy"
+
+repository: https://github.com/iMeshAcademy/EventEmitter
+
 environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"
 
 dependencies:
   meta : ^1.1.6
   async : ^2.0.8
-  eventify : '>0.1.1'
+  eventify : '>0.1.1 <1.0.0'

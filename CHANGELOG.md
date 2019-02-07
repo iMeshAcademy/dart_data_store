@@ -1,3 +1,5 @@
+#0.1.5
+- Issues with filter operation. Added support for forceFilter, which will enable user to perform force filtering the store, even if the store is already filterd - Scenario where an update causes the record to be filtered out would be an example.
 # 0.1.4
 - Setting/getting key independent of fields. 
 - Key would be set or get whether it is defined in fields for the model.
