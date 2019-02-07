@@ -15,9 +15,8 @@ class MemoryStore<T extends Model> extends Store<T>
   @override
   void performAdd(record, DatabaseOperationCallback callback) {
     if (cached) {
-      super.cachedRecords.add(record);
       record.key = "${record.modelName}__id__$count";
-
+      super.cachedRecords.add(record);
       callback(1, null);
     } else {
       callback(0, "Store is not cached.");

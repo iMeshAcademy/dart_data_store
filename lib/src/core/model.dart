@@ -52,7 +52,7 @@ abstract class Model {
   void save() {
     if (isModified) {
       var store = StoreFactory().getByModel(modelName);
-      if (key.length > 0) {
+      if (key != null && key.isNotEmpty) {
         store.update(this);
       } else {
         store.add(this);

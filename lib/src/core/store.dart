@@ -185,8 +185,8 @@ abstract class Store<T extends Model> extends EventEmitter {
   void add(Model record) {
     performAdd(record, (data, error) {
       if ((data as int) > 0) {
-        sort(null, false);
-        filter(null, false);
+        sort(null, false, true);
+        filter(null, false, true);
         emit("add", this, record);
       } else {
         emit("error", this,
