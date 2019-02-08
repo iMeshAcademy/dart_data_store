@@ -1,7 +1,7 @@
 library dart_store;
 
 import 'package:meta/meta.dart';
-import 'package:eventify/eventify.dart' show EventEmitter;
+import 'package:eventify/eventify.dart' show Event, EventEmitter;
 
 part 'src/core/model.dart';
 part 'src/core/store.dart';
@@ -13,3 +13,4 @@ part 'src/core/storage.dart';
 part 'src/core/filterable.dart';
 part 'src/core/sortable.dart';
 part 'src/stores/memorystore.dart';
+part 'src/core/collection.dart';

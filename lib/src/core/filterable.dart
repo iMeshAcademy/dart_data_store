@@ -17,15 +17,9 @@ typedef void DatabaseOperationCallback<T extends Model>(
 /// Mixin, which provide filterable support for the store.
 /// Store, by default won't support this mixin.
 mixin Filterable<T extends Model> {
-  _CacheControl _records_;
-  _CacheControl _filteredList_;
-
-  _CacheControl get cachedRecords => _records_;
-  _CacheControl get filteredRecords => _filteredList_;
-
-  bool _filtered = false;
-  bool _cached = false;
   bool _suspendFilters = false;
+
+  bool get filtersSuspended => this._suspendFilters;
 
   List<dynamic> _filters = List<dynamic>();
 
@@ -35,13 +29,6 @@ mixin Filterable<T extends Model> {
   /// Update list of filters with the collection.
   set filters(List<dynamic> value) => this._filters = value;
 
-  /// API which initializes cache control.
-  /// This shall be called prior to use the class.
-  void initCache() {
-    this._records_ = new _CacheControl(cached);
-    this._filteredList_ = new _CacheControl(cached);
-  }
-
   ///
   /// Filter API.
   ///  Use this API to perform filter operation.
@@ -50,10 +37,7 @@ mixin Filterable<T extends Model> {
   /// [force] - This parameter is used to perform force filtering. If supplied -
   /// filter operation will be performed without checking internal state.
   ///
-  filterBy([dynamic configOrCallback, bool notify = true, bool force]) {
-    if (this._suspendFilters) {
-      return;
-    }
+  filterBy([dynamic configOrCallback, bool notify, bool force]) {
     applyFilter(configOrCallback, notify, force);
   }
 
@@ -61,38 +45,35 @@ mixin Filterable<T extends Model> {
   /// Filters can be based on filter configurations or based on filter callback function.
   /// Refer [filterBy] to check valid configurations.
   @protected
-  void applyFilter(dynamic filter,
-      [bool fireEvent = true, bool bForce = false]) {
-    if (false == cached) {
-      // Collection is not cached, so no records to perform filter.
-      return;
-    }
-    // Sanity check the new filter.
-    if (null == filter) {
-      if (filtered && false == bForce) {
-        // Return filtered list if it is already filtered and no new filters are added.
-        if (fireEvent && false == this._suspendFilters) onFiltered();
-        return;
-      }
-    } else {
-      if (this._filters.contains(filter) == false) {
-        // Add to filters if the filter is not present already.
-        this._filters.add(filter);
-      }
+  void applyFilter(dynamic filter, [bool notify = true, bool bForce = false]) {
+    // Perform sanity of input fields.
+    if (null != filter && this._filters.contains(filter) == false) {
+      this._filters.add(filter);
     }
 
-    if (false == hasFilters) {
-      if (false == this._suspendFilters) onFilterFailed();
+    if (false == bForce && false == hasFilters) {
+      print("Filter failed. Returning.");
+      if (notify) onFilterFailed();
       return;
     }
 
-    this.performFilter(records, (data, error) {
-      this.filteredRecords(data);
-      this._filtered = true;
+    this.performFilter(this.getAllRecords(), (data, error) {
       // Emit filter event if it is required in the current operation context.
-      if (fireEvent && false == this._suspendFilters) onFiltered();
+      if (false == this.filtersSuspended) {
+        if (data != null) {
+          print("Filtered - Data length - ${data.length}");
+          onFiltered(data, notify);
+        } else {
+          this.onFilterFailed();
+        }
+      } else {
+        print("Filter suspended. Not performing.");
+      }
     });
   }
+
+  List<T> getAllRecords();
+  List<T> getFilteredRecords();
 
   ///
   /// Routine which perform filter operation on the collection.
@@ -101,6 +82,10 @@ mixin Filterable<T extends Model> {
   ///
   @protected
   void performFilter(List<T> records, DatabaseOperationCallback callback) {
+    if (this._suspendFilters) {
+      callback(null, "Filter is suspended");
+      return;
+    }
     List<T> filtered = List<T>();
     records.forEach((rec) {
       bool bFiltered = true;
@@ -176,8 +161,7 @@ mixin Filterable<T extends Model> {
     });
 
     if (this._filters.length != filterLen) {
-      this._filtered = false; // Need to force filtering.
-      this.filterBy();
+      this.filterBy(null, true, true);
     }
   }
 
@@ -194,23 +178,23 @@ mixin Filterable<T extends Model> {
       }
     });
     if (this._filters.length != filterLen) {
-      this._filtered = false; // Need to force filtering.
-      this.filterBy();
+      this.filterBy(null, true, true);
     }
   }
 
   /// Empty filters. This shall clear all filters.
   void clearFilters() {
     this._filters.clear();
-    this._filtered = false;
-    if (false == this._suspendFilters) this.onFiltered();
+    this.onFiltersCleared();
   }
 
   /// Fire filtered. Implementer of this function can provide appropriate implementation.
-  void onFiltered();
+  void onFiltered(List<T> data, [bool emit = false]);
 
   /// Just to notify that filter operation has failed.
   void onFilterFailed();
+
+  void onFiltersCleared();
 
   /// Suspend filter operation.
   void suspendFilter() {
@@ -222,87 +206,6 @@ mixin Filterable<T extends Model> {
     this._suspendFilters = false;
   }
 
-  /// Get the filtered status.
-  bool get filtered => this._filtered;
-
   /// Check if any valid filters are there in cache.
   bool get hasFilters => this._filters.isNotEmpty;
-
-  /// Check if cache is enabled for the collection.
-  /// If the [cached] value is false, the collection won't store any records.
-  bool get cached => this._cached;
-
-  /// Protected API to set cache control.
-  @protected
-  set cached(bool val) => this._cached = val;
-
-  /// Get the list of records in the collection.
-  /// If not cached, the collection will be empty always.
-  /// Any operations being performed on the collection, when cache is off, wont be saved.
-  List<T> get records => cached
-      ? (filtered ? this.filteredRecords.records : this.cachedRecords.records)
-      : List<T>();
-
-  /// Get the length of items in collection.
-  int get count => records.length;
-
-  /// Get the index of the record in the collection.
-  /// Useful when performing update operation.
-  int indexOf(T model) => this.records.indexOf(model);
-}
-
-// Class which takes care of cache control.
-// If store is cached, then this class will provide cache support for the store.
-class _CacheControl<T extends Model> implements Function {
-  List<T> _cachedRecords = List<T>();
-  final bool cached;
-
-  _CacheControl(this.cached);
-
-  void call(dynamic data) {
-    if (cached && data is List<T>) {
-      this._cachedRecords = data;
-    }
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (other is _CacheControl) {
-      return other.cached == this.cached &&
-          other._cachedRecords == this._cachedRecords;
-    }
-    return false;
-  }
-
-  @override
-  int get hashCode =>
-      this.cached.hashCode ^ this._cachedRecords.hashCode ^ super.hashCode;
-
-  /// Add records to the cache.
-  void add(T model) {
-    if (this.cached && false == this._cachedRecords.contains(model)) {
-      this._cachedRecords.add(model);
-    }
-  }
-
-  /// Remove records from cache.
-  void remove(T model) {
-    if (this.cached && this._cachedRecords.contains(model)) {
-      this._cachedRecords.remove(model);
-    }
-  }
-
-  /// Clear, records from cache.
-  void clear() {
-    if (this.cached) {
-      this._cachedRecords.clear();
-    }
-  }
-
-  /// Retrieve the index of the particular record in collection.
-  int indexOf(T m) => this._cachedRecords.indexOf(m);
-
-  /// Get the records from cache.
-  /// Make sure not to perform any operation on the records collection as it is the reference we are getting.
-  List<T> get records => this._cachedRecords;
 }

@@ -4,8 +4,7 @@ typedef int SortComparerCallback<T extends Model>(T record1, T record2);
 
 mixin Sortable<T extends Model> {
   List<dynamic> _sorters = List<dynamic>();
-  bool _sorted = false;
-  bool _suspended = false;
+  bool _sortSuspended = false;
 
   List<dynamic> get sorters => this._sorters;
 
@@ -13,37 +12,26 @@ mixin Sortable<T extends Model> {
   set sorters(List<dynamic> value) => this._sorters = value;
 
   bool get hasSorters => this._sorters.isNotEmpty;
-  bool get sorted => this._sorted;
 
   void onSorted();
+
+  /// Sort failed.
   void onSortFailed();
 
-  /// This function provide sorting support to the store.
-  /// Sorter can be a sort configuration, understood by the implementation or a callback function.
-  /// If callback function is specified, that function shall be used as a comparer by the implementer.
-  @protected
-  void applySorter(List<T> records, dynamic sorter,
-      [bool fireEvent = true, bool force = false]) {
-    if (null == records) {
-      return; // Either already sorted, or no need to sort the list.
-    }
+  void supendSort() {
+    this._sortSuspended = true;
+  }
 
-    if (null != sorter && false == this._sorters.contains(sorter)) {
-      // Add  new sorter to the list.
-      this._sorters.add(sorter);
-    }
+  void resumeSort() {
+    this._sortSuspended = false;
+  }
 
-    // Perform sort operation.
-    performSort(records, (data, error) {
-      if (error != null) {
-        this._sorted = false;
-        onSortFailed();
-      } else {
-        // Flag sorted to true.
-        this._sorted = true;
-        if (fireEvent) onSorted(); // Fire sort event.
-      }
-    });
+  void removeSorter(dynamic sorter) {
+    throw new UnsupportedError("This API is not supported in this version.");
+  }
+
+  void clearSorters() {
+    throw new UnsupportedError("This API is not supported in this version.");
   }
 
   ///
@@ -56,13 +44,13 @@ mixin Sortable<T extends Model> {
   ///   }
   ///
   @protected
-  void sortList(List<T> recs) {
+  void sortList(List<T> recs, DatabaseOperationCallback callback) {
     // Sorting is suspended, return.
-    if (this._suspended) {
-      return;
-    }
-
-    if (hasSorters == false || null == recs) {
+    if (this._sortSuspended ||
+        this.hasSorters == false ||
+        null == recs ||
+        recs.isEmpty) {
+      if (null != callback) callback(null, "Sort Failed");
       return;
     }
 
@@ -100,42 +88,37 @@ mixin Sortable<T extends Model> {
 
       return sort;
     });
-  }
 
-  ///
-  ///   Perform sort operation. Sort can be done using the following configuration or by using a comparer.
-  ///   {
-  ///     property : fieldName,
-  ///     direction : asc|desc
-  ///     caseSensitive: true|false,
-  ///     name  : String - a unique name for this sorter.
-  ///   }
-  ///
-  @protected
-  void performSort(List<T> records, DatabaseOperationCallback callback) {
-    if (this._suspended) {
-      callback(null, "Could not perform sort as it is suspended.");
-      return;
-    }
-    sortList(records);
     if (null != callback) {
-      callback(records, null);
+      callback(recs, null);
     }
   }
 
-  void supendSort() {
-    this._suspended = true;
-  }
+  /// This function provide sorting support to the store.
+  /// Sorter can be a sort configuration, understood by the implementation or a callback function.
+  /// If callback function is specified, that function shall be used as a comparer by the implementer.
+  @protected
+  void applySorter(List<T> records, dynamic sorter,
+      [bool fireEvent = true, bool force = false]) {
+    if (null == records || records.isEmpty) {
+      this.onSortFailed();
+      return; // Either already sorted, or no need to sort the list.
+    }
 
-  void resumeSort() {
-    this._suspended = false;
-  }
+    if (null != sorter && false == this._sorters.contains(sorter)) {
+      // Add  new sorter to the list.
+      this._sorters.add(sorter);
+    }
 
-  void removeSorter() {
-    throw new UnsupportedError("This API is not supported in this version.");
-  }
-
-  void clearSorters() {
-    throw new UnsupportedError("This API is not supported in this version.");
+    // Perform sort operation.
+    sortList(records, (data, error) {
+      if (error != null) {
+        print(error);
+        onSortFailed();
+      } else {
+        // Flag sorted to true.
+        if (fireEvent) onSorted(); // Fire sort event.
+      }
+    });
   }
 }

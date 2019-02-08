@@ -1,7 +1,6 @@
 part of dart_store;
 
-class MemoryStore<T extends Model> extends Store<T>
-    with Filterable<T>, Sortable<T> {
+class MemoryStore<T extends Model> extends Store<T> with ModelCollection<T> {
   bool _loaded = false;
   MemoryStore(dynamic config) : super(config) {
     if (this.storage != null && this.storage.isOpen == false) {
@@ -14,13 +13,8 @@ class MemoryStore<T extends Model> extends Store<T>
 
   @override
   void performAdd(record, DatabaseOperationCallback callback) {
-    if (cached) {
-      record.key = "${record.modelName}__id__$count";
-      super.cachedRecords.add(record);
-      callback(1, null);
-    } else {
-      callback(0, "Store is not cached.");
-    }
+    record.key = "${record.modelName}__id__$count";
+    addRecord(record, callback);
   }
 
   @override
@@ -40,29 +34,17 @@ class MemoryStore<T extends Model> extends Store<T>
 
   @override
   void performRemove(record, DatabaseOperationCallback callback) {
-    if (cached) {
-      super.cachedRecords.remove(record);
-      super.filteredRecords.remove(record);
-      callback(1, null);
-    } else {
-      callback(null, "Store is not cached!");
-    }
+    removeRecord(record, callback);
   }
 
   @override
   void performRemoveAll(DatabaseOperationCallback callback) {
-    if (cached) {
-      super.cachedRecords.clear();
-      super.filteredRecords.clear();
-      callback(1, null);
-    } else {
-      callback(0, "Store is not cached!");
-    }
+    removeAllRecords(callback);
   }
 
   @override
   void performUpdate(record, DatabaseOperationCallback callback) {
-    callback(cached ? 1 : 0, cached ? null : "Store is not cached");
+    updateRecord(record, callback);
   }
 
   @override
@@ -79,7 +61,7 @@ class MemoryStore<T extends Model> extends Store<T>
           switch (str) {
             case "cached":
               this.cached = val;
-              super.initCache(); // Instantiate the list and other details.
+              initCache(this.cached); // Instantiate the list and other details.
               break;
             case "filters":
               if (val is List<dynamic>) {
@@ -103,28 +85,7 @@ class MemoryStore<T extends Model> extends Store<T>
 
   @override
   void sort([dynamic config, bool fireEvent = true, bool force]) {
-    super.applySorter(records, config, fireEvent, force);
-  }
-
-  @override
-  void onFilterFailed() {
-    emit("error", this, new DatabaseError("filter", "Filter failed", null));
-  }
-
-  @override
-  void onFiltered() {
-    emit("filter", this, records);
-  }
-
-  @override
-  void onSortFailed() {
-    emit("error", this,
-        new DatabaseError("sort", "Sort operation failed.", null));
-  }
-
-  @override
-  void onSorted() {
-    emit("sort", this);
+    super.sortCollection(config, fireEvent, force);
   }
 
   @override
@@ -132,4 +93,14 @@ class MemoryStore<T extends Model> extends Store<T>
 
   @override
   bool get isSorted => this.sorted;
+
+  @override
+  void notifyCollectionModified(Event ev, Object context) {
+    switch (ev.eventName) {
+      case "filter":
+      case "sort":
+      case "clear":
+        emit(ev.eventName, this, ev.eventData);
+    }
+  }
 }
