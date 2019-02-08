@@ -1,3 +1,6 @@
+# 0.1.7
+- Provided support for disable sort/disable filter.
+- Faster sort is enabled with optimized sorters.
 # 0.1.6
 - Optimized performance of the framework.
 - Updated memory store to improve sort performance as it uses sorted collection, which automatically performs sorting.

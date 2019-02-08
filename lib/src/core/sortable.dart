@@ -11,7 +11,9 @@ mixin Sortable<T extends Model> {
   @protected
   set sorters(List<dynamic> value) => this._sorters = value;
 
-  bool get hasSorters => this._sorters.isNotEmpty;
+  bool get hasSorters {
+    return this._sorters.isNotEmpty;
+  }
 
   void onSorted();
 
@@ -26,12 +28,85 @@ mixin Sortable<T extends Model> {
     this._sortSuspended = false;
   }
 
+  bool _isSorterEnabled(dynamic value) {
+    if (value is Function) {
+      return true;
+    } else if (value is Map<String, dynamic>) {
+      return value.containsKey("enabled") ? value["enabled"] as bool : false;
+    } else if (value is String) {
+      Map<String, dynamic> sorter =
+          this._sorters.firstWhere((it) => it["name"] == value);
+      if (null != sorter) {
+        return sorter.containsKey("enabled")
+            ? sorter["enabled"] as bool
+            : false;
+      }
+    }
+
+    return false;
+  }
+
   void removeSorter(dynamic sorter) {
-    throw new UnsupportedError("This API is not supported in this version.");
+    if (sorter == null) {
+      return;
+    }
+    if (sorter is Function && this.sorters.contains(sorter)) {
+      this.sorters.remove(sorter);
+    } else if (sorter is Map<String, dynamic>) {
+      if (this.sorters.contains(sorter)) {
+        this.sorters.remove(sorter);
+      } else if (sorter.containsKey("name")) {
+        this.removeSorterByName(sorter["name"]);
+      }
+    }
+  }
+
+  void removeSorterByName(String name) {
+    if (this.sorters != null) {
+      this.sorters.removeWhere((s) => s["name"] == name);
+    }
   }
 
   void clearSorters() {
-    throw new UnsupportedError("This API is not supported in this version.");
+    this._sorters.clear();
+  }
+
+  void enableSorter(dynamic value) {
+    this._toggleSorterState(value, true);
+  }
+
+  void _toggleSorterState(dynamic value, bool state) {
+    if (value is Function) {
+      if (this.sorters.contains(value) == false) {
+        this.sorters.add(value);
+      }
+    } else if (value is Map<String, dynamic>) {
+      if (this.sorters.contains(value)) {
+        value["enabled"] = state;
+      }
+    } else if (value is String) {
+      Map<String, dynamic> sorter =
+          this.sorters.singleWhere((it) => it["name"] == value);
+      if (null != sorter) {
+        sorter["enabled"] = state;
+      }
+    }
+  }
+
+  void disableAllSorters() {
+    for (int i = 0; i < this._sorters.length; i++) {
+      this.disableSorter(this._sorters[i]);
+    }
+  }
+
+  void enableAllSorters() {
+    for (int i = 0; i < this._sorters.length; i++) {
+      this.enableSorter(this._sorters[i]);
+    }
+  }
+
+  void disableSorter(dynamic value) {
+    this._toggleSorterState(value, false);
   }
 
   ///
@@ -59,39 +134,42 @@ mixin Sortable<T extends Model> {
     List<Function> fns = List<Function>();
 
     this.sorters.forEach((sorter) {
-      Function sort;
-      bool caseSensitive = false;
-      String direction = "";
-      Function comparer;
-      if (sorter is SortComparerCallback) {
-        sort = sorter;
-      } else if (sorter is Map<String, dynamic>) {
-        caseSensitive = sorter['caseSensitive'] ?? false;
-        direction = sorter["direction"] ?? "asc";
+      if (this._isSorterEnabled(sorter)) {
+        print("Sorter is enabled - $sorter");
+        Function sort;
+        bool caseSensitive = false;
+        String direction = "";
+        Function comparer;
+        if (sorter is SortComparerCallback) {
+          sort = sorter;
+        } else if (sorter is Map<String, dynamic>) {
+          caseSensitive = sorter['caseSensitive'] ?? false;
+          direction = sorter["direction"] ?? "asc";
 
-        comparer = sorter["comparer"];
+          comparer = sorter["comparer"];
 
-        sort = (Model a, Model b) {
-          dynamic val1 = a.getValue(sorter["property"]);
-          dynamic val2 = b.getValue(sorter["property"]);
+          sort = (Model a, Model b) {
+            dynamic val1 = a.getValue(sorter["property"]);
+            dynamic val2 = b.getValue(sorter["property"]);
 
-          if (caseSensitive && val1 is String) {
-            val1 = (val1 as String).toLowerCase();
-            val2 = (val2 as String).toLowerCase();
-          }
+            if (caseSensitive && val1 is String) {
+              val1 = (val1 as String).toLowerCase();
+              val2 = (val2 as String).toLowerCase();
+            }
 
-          var sortValue = comparer != null
-              ? comparer(val1, val2)
-              : val1 > val2 ? 1 : val1 == val2 ? 0 : -1;
+            var sortValue = comparer != null
+                ? comparer(val1, val2)
+                : val1 > val2 ? 1 : val1 == val2 ? 0 : -1;
 
-          if (direction != "asc") {
-            sortValue *= -1;
-          }
+            if (direction != "asc") {
+              sortValue *= -1;
+            }
 
-          return sortValue;
-        };
+            return sortValue;
+          };
+        }
+        fns.add(sort);
       }
-      fns.add(sort);
     });
 
     recs.sort((a, b) {

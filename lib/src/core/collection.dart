@@ -327,6 +327,26 @@ mixin ModelCollection<T extends Model> {
     this._collection.clearSorters();
   }
 
+  void removeSorterByName(String name) {
+    return this._collection.removeSorterByName(name);
+  }
+
+  void enableSorter(dynamic value) {
+    this._collection.enableSorter(value);
+  }
+
+  void disableAllSorters() {
+    this._collection.disableAllSorters();
+  }
+
+  void enableAllSorters() {
+    this._collection.enableAllSorters();
+  }
+
+  void disableSorter(dynamic value) {
+    this._collection.disableSorter(value);
+  }
+
   void sortCollection(
       [dynamic config, bool fireEvent = true, bool force = false]) {
     this._collection.sort(config, fireEvent, force);

@@ -111,10 +111,12 @@ class MemoryStore<T extends Model> extends Store<T> with ModelCollection<T> {
   @override
   void filterInternal() {
     /// Internal filter API which will be called by store.
+    /// Do nothing as memory store already supports filterable collections.
   }
 
   @override
   void sortInternal() {
     /// Internal sort API which will be called by store.
+    /// Do nothing, as memory store already supports sortable collections.
   }
 }
