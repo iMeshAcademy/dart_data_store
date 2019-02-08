@@ -52,7 +52,6 @@ mixin Filterable<T extends Model> {
     }
 
     if (false == bForce && false == hasFilters) {
-      print("Filter failed. Returning.");
       if (notify) onFilterFailed();
       return;
     }
@@ -61,13 +60,10 @@ mixin Filterable<T extends Model> {
       // Emit filter event if it is required in the current operation context.
       if (false == this.filtersSuspended) {
         if (data != null) {
-          print("Filtered - Data length - ${data.length}");
           onFiltered(data, notify);
         } else {
           this.onFilterFailed();
         }
-      } else {
-        print("Filter suspended. Not performing.");
       }
     });
   }

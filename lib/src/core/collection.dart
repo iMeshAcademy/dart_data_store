@@ -30,7 +30,7 @@ class Collection<T extends Model>
 
   @override
   void onFiltered(List<T> data, [bool notify = false]) {
-    this._filtered = this.hasFilters;
+    this._filtered = this._allRecords.isNotEmpty && this.hasFilters;
     this._filteredRecords = data;
 
     if (notify) emit("filter", this, this.records);
@@ -90,33 +90,24 @@ class Collection<T extends Model>
   }
 
   void add(T rec, DatabaseOperationCallback callback) {
-    if (this._allRecords.contains(rec) == false) {
-      this._allRecords.add(rec);
-      applySorter(this._allRecords, null, false, true);
+    this._allRecords.add(rec);
+    applySorter(this._allRecords, null, false, true);
+    if (this.filtered || hasFilters) {
       applyFilter(null, false, true);
-      if (null != callback) {
-        callback(1, null);
-      }
-      emit("add", this, rec);
-    } else {
-      if (null != callback) {
-        callback(
-            0,
-            new DatabaseError(
-                "add", "Record already exist in cache. Details - $rec", rec));
-      }
-      emit(
-          "error",
-          this,
-          new DatabaseError(
-              "add", "Record already exist in cache. Details - $rec", rec));
     }
+    if (null != callback) {
+      callback(1, null);
+    }
+    emit("add", this, rec);
   }
 
   /// Remove records from cache.
   void remove(T model, DatabaseOperationCallback callback) {
     if (null != model && this._allRecords.contains(model)) {
       this._allRecords.remove(model);
+      if (this.filtered) {
+        applyFilter(null, false, true);
+      }
       if (null != callback) {
         callback(1, null);
       }
@@ -141,8 +132,6 @@ class Collection<T extends Model>
     if (null != model) {
       String key = model.key;
       index = this._allRecords.indexWhere((m) => m.key == key);
-
-      print("Key - $key, index - ");
     }
 
     if (index >= 0) {
@@ -152,11 +141,9 @@ class Collection<T extends Model>
       if (null != callback) {
         callback(1, null);
       }
-      print("Update successful!!!");
 
       emit("update", this, model);
     } else {
-      print("Update failed!!!");
       if (null != callback) {
         callback(
             0,
@@ -173,8 +160,8 @@ class Collection<T extends Model>
 
   void clearRecords(DatabaseOperationCallback callback) {
     this._allRecords.clear();
-    applySorter(this._allRecords, null, false);
-    applyFilter(null, false);
+    applySorter(this._allRecords, null, false, true);
+    applyFilter(null, false, true);
     if (null != callback) {
       callback(1, null);
     }
@@ -182,7 +169,7 @@ class Collection<T extends Model>
   }
 
   void sort([dynamic config, bool fireEvent = true, bool force = false]) {
-    applySorter(records, config, fireEvent, force);
+    applySorter(this._allRecords, config, fireEvent, force);
   }
 
   void filter([dynamic configOrCallback, bool notify, bool force]) {
@@ -206,7 +193,6 @@ mixin ModelCollection<T extends Model> {
   bool get cached => this._cached;
 
   void onCollectionModifiedCallback(Event ev, Object context) {
-    print("${ev.eventName} - ${ev.eventData}");
     this.notifyCollectionModified(ev, context);
   }
 

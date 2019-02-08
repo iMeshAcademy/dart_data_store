@@ -13,7 +13,7 @@ class MemoryStore<T extends Model> extends Store<T> with ModelCollection<T> {
 
   @override
   void performAdd(record, DatabaseOperationCallback callback) {
-    record.key = "${record.modelName}__id__$count";
+    record.key = "${record.modelName}__id__${this.allRecords.length}";
     addRecord(record, callback);
   }
 
@@ -85,6 +85,7 @@ class MemoryStore<T extends Model> extends Store<T> with ModelCollection<T> {
 
   @override
   void sort([dynamic config, bool fireEvent = true, bool force]) {
+    // Not performing sorting as collection is auto sortable.
     super.sortCollection(config, fireEvent, force);
   }
 
@@ -102,5 +103,18 @@ class MemoryStore<T extends Model> extends Store<T> with ModelCollection<T> {
       case "clear":
         emit(ev.eventName, this, ev.eventData);
     }
+  }
+
+  @override
+  int get recordCount => this.records.length;
+
+  @override
+  void filterInternal() {
+    /// Internal filter API which will be called by store.
+  }
+
+  @override
+  void sortInternal() {
+    /// Internal sort API which will be called by store.
   }
 }

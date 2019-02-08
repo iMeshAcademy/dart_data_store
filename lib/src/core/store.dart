@@ -158,8 +158,8 @@ abstract class Store<T extends Model> extends EventEmitter {
   void load() {
     try {
       performLoad((data, error) {
-        sort(null, false);
-        filter(null, false);
+        sortInternal();
+        filterInternal();
         if (data != null) {
           emit("load", this, data);
         } else {
@@ -185,8 +185,8 @@ abstract class Store<T extends Model> extends EventEmitter {
   void add(Model record) {
     performAdd(record, (data, error) {
       if ((data as int) > 0) {
-        sort(null, false, true);
-        filter(null, false, true);
+        sortInternal();
+        filterInternal();
         emit("add", this, record);
       } else {
         emit("error", this,
@@ -248,8 +248,8 @@ abstract class Store<T extends Model> extends EventEmitter {
   void update(Model record) {
     performUpdate(record, (result, error) {
       if ((result as int) > 0) {
-        sort(null, false, true);
-        filter(null, false, true);
+        sortInternal();
+        filterInternal();
         emit("update", this, record);
       } else {
         emit("error", this,
@@ -288,6 +288,11 @@ abstract class Store<T extends Model> extends EventEmitter {
     });
   }
 
+  @protected
+  void sortInternal();
+  @protected
+  void filterInternal();
+
   void filter([dynamic config, bool fireEvent = true, bool force = false]);
 
   void sort([dynamic config, bool fireEvent = true, bool force = false]);
@@ -315,6 +320,7 @@ abstract class Store<T extends Model> extends EventEmitter {
   bool get queueingEnabled => this._supportsQueueing;
   String get modelName => this._modelName;
   Storage get storage => this._storage;
+  int get recordCount;
   bool get isLoaded;
   bool get isFiltered;
   bool get isSorted;

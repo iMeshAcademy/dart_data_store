@@ -54,37 +54,84 @@ mixin Sortable<T extends Model> {
       return;
     }
 
-    recs.sort((a, b) {
-      int sort = 0;
-      for (var i = 0; i < this.sorters.length; i++) {
-        var sorter = sorters[i];
+    for (var i = 0; i < this.sorters.length; i++) {}
 
-        if (sorter is SortComparerCallback) {
-          sort = sorter(a, b);
-        } else if (sorter is Map<String, dynamic>) {
-          bool caseSensitive = sorter['caseSensitive'] ?? false;
-          String direction = sorter["direction"] ?? "asc";
+    List<Function> fns = List<Function>();
+
+    this.sorters.forEach((sorter) {
+      Function sort;
+      bool caseSensitive = false;
+      String direction = "";
+      Function comparer;
+      if (sorter is SortComparerCallback) {
+        sort = sorter;
+      } else if (sorter is Map<String, dynamic>) {
+        caseSensitive = sorter['caseSensitive'] ?? false;
+        direction = sorter["direction"] ?? "asc";
+
+        comparer = sorter["comparer"];
+
+        sort = (Model a, Model b) {
           dynamic val1 = a.getValue(sorter["property"]);
           dynamic val2 = b.getValue(sorter["property"]);
 
-          Function comparer = sorter["comparer"];
           if (caseSensitive && val1 is String) {
             val1 = (val1 as String).toLowerCase();
             val2 = (val2 as String).toLowerCase();
           }
-          sort = comparer != null
+
+          var sortValue = comparer != null
               ? comparer(val1, val2)
               : val1 > val2 ? 1 : val1 == val2 ? 0 : -1;
 
           if (direction != "asc") {
-            sort *= -1;
+            sortValue *= -1;
           }
-        }
 
+          return sortValue;
+        };
+      }
+      fns.add(sort);
+    });
+
+    recs.sort((a, b) {
+      int sort = 0;
+
+      for (var i = 0; i < fns.length; i++) {
+        sort = fns[i](a, b);
         if (sort != 0) {
           break;
         }
       }
+      // for (var i = 0; i < this.sorters.length; i++) {
+      //   var sorter = sorters[i];
+
+      //   if (sorter is SortComparerCallback) {
+      //     sort = sorter(a, b);
+      //   } else if (sorter is Map<String, dynamic>) {
+      //     bool caseSensitive = sorter['caseSensitive'] ?? false;
+      //     String direction = sorter["direction"] ?? "asc";
+      //     dynamic val1 = a.getValue(sorter["property"]);
+      //     dynamic val2 = b.getValue(sorter["property"]);
+
+      //     Function comparer = sorter["comparer"];
+      //     if (caseSensitive && val1 is String) {
+      //       val1 = (val1 as String).toLowerCase();
+      //       val2 = (val2 as String).toLowerCase();
+      //     }
+      //     sort = comparer != null
+      //         ? comparer(val1, val2)
+      //         : val1 > val2 ? 1 : val1 == val2 ? 0 : -1;
+
+      //     if (direction != "asc") {
+      //       sort *= -1;
+      //     }
+      //   }
+
+      //   if (sort != 0) {
+      //     break;
+      //   }
+      // }
 
       return sort;
     });
@@ -113,7 +160,6 @@ mixin Sortable<T extends Model> {
     // Perform sort operation.
     sortList(records, (data, error) {
       if (error != null) {
-        print(error);
         onSortFailed();
       } else {
         // Flag sorted to true.
