@@ -1,7 +1,7 @@
 name: dart_store
 description: Simple, evented data-store framework for dart, which support event driven development.
 
-version: 0.1.7
+version: 0.1.8
 
 authors:
 - Ajeesh B Nair <ajeeshklr@gmail.com>
@@ -9,7 +9,7 @@ authors:
 
 homepage: "https://github.com/iMeshAcademy"
 
-repository: https://github.com/iMeshAcademy/EventEmitter
+repository: https://github.com/iMeshAcademy/dart_data_store
 
 environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"

@@ -293,7 +293,11 @@ abstract class Store<T extends Model> extends EventEmitter {
   @protected
   void filterInternal();
 
-  void filter([dynamic config, bool fireEvent = true, bool force = false]);
+  void filter(
+      [dynamic config,
+      bool fireEvent = true,
+      bool force = false,
+      dynamic data = null]);
 
   void sort([dynamic config, bool fireEvent = true, bool force = false]);
 

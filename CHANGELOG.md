@@ -1,3 +1,8 @@
+# 0.1.8
+- Updated framework to accept filter parameters.
+- This is provided as an extension to the existing API.
+- A new datastructure shall be introduced in future to accomodate any future filter mechanism.
+
 # 0.1.7
 - Provided support for disable sort/disable filter.
 - Faster sort is enabled with optimized sorters.

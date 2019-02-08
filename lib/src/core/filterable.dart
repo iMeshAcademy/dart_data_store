@@ -6,7 +6,7 @@ part of dart_store;
 /// Callback function to perform filter operation.
 /// If the return value is [true] then that record will be included in the filtered result.
 /// This function accepts [Model] as input parameter.
-typedef bool FilterCallback<T extends Model>(T record);
+typedef bool FilterCallback<T extends Model>(T record, dynamic data);
 
 /// Result of a database operation with the [Store] or [Storage]
 /// Check  [result] or [error] in order to understand status of the operation.
@@ -37,15 +37,20 @@ mixin Filterable<T extends Model> {
   /// [force] - This parameter is used to perform force filtering. If supplied -
   /// filter operation will be performed without checking internal state.
   ///
-  filterBy([dynamic configOrCallback, bool notify, bool force]) {
-    applyFilter(configOrCallback, notify, force);
+  filterBy(
+      [dynamic configOrCallback,
+      bool notify,
+      bool force,
+      dynamic data = null]) {
+    applyFilter(configOrCallback, notify, force, data);
   }
 
   /// This function provide mechanism to filter store entries.
   /// Filters can be based on filter configurations or based on filter callback function.
   /// Refer [filterBy] to check valid configurations.
   @protected
-  void applyFilter(dynamic filter, [bool notify = true, bool bForce = false]) {
+  void applyFilter(dynamic filter,
+      [bool notify = true, bool bForce = false, dynamic data = null]) {
     // Perform sanity of input fields.
     if (null != filter && this._filters.contains(filter) == false) {
       this._filters.add(filter);
@@ -56,11 +61,11 @@ mixin Filterable<T extends Model> {
       return;
     }
 
-    this.performFilter(this.getAllRecords(), (data, error) {
+    this.performFilter(this.getAllRecords(), data, (result, error) {
       // Emit filter event if it is required in the current operation context.
       if (false == this.filtersSuspended) {
-        if (data != null) {
-          onFiltered(data, notify);
+        if (result != null) {
+          onFiltered(result, notify);
         } else {
           this.onFilterFailed();
         }
@@ -77,7 +82,8 @@ mixin Filterable<T extends Model> {
   /// [callback] - A callback, which emits success or failure with results.
   ///
   @protected
-  void performFilter(List<T> records, DatabaseOperationCallback callback) {
+  void performFilter(
+      List<T> records, dynamic data, DatabaseOperationCallback callback) {
     if (this._suspendFilters) {
       callback(null, "Filter is suspended");
       return;
@@ -88,7 +94,7 @@ mixin Filterable<T extends Model> {
       this.filters.forEach((filter) {
         if (null != filter) {
           if (filter is FilterCallback) {
-            bFiltered &= filter(rec);
+            bFiltered &= filter(rec, data);
           } else {
             if (filter is Map<String, dynamic>) {
               dynamic val = rec.getValue(filter["property"]);

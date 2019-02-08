@@ -48,8 +48,12 @@ class MemoryStore<T extends Model> extends Store<T> with ModelCollection<T> {
   }
 
   @override
-  void filter([dynamic config, bool fireEvent = true, bool force]) {
-    filterBy(config, fireEvent, force);
+  void filter(
+      [dynamic config,
+      bool fireEvent = true,
+      bool force,
+      dynamic data = null]) {
+    filterBy(config, fireEvent, force, data);
   }
 
   @override

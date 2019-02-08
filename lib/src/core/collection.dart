@@ -172,8 +172,9 @@ class Collection<T extends Model>
     applySorter(this._allRecords, config, fireEvent, force);
   }
 
-  void filter([dynamic configOrCallback, bool notify, bool force]) {
-    filterBy(configOrCallback, notify, force);
+  void filter(
+      [dynamic configOrCallback, bool notify, bool force, dynamic data]) {
+    filterBy(configOrCallback, notify, force, data);
   }
 
   int indexOf(T rec) => this.records.indexOf(rec);
@@ -307,8 +308,12 @@ mixin ModelCollection<T extends Model> {
   /// [force] - This parameter is used to perform force filtering. If supplied -
   /// filter operation will be performed without checking internal state.
   ///
-  filterBy([dynamic configOrCallback, bool notify, bool force]) {
-    this._collection.filter(configOrCallback, notify, force);
+  filterBy(
+      [dynamic configOrCallback,
+      bool notify,
+      bool force,
+      dynamic data = null]) {
+    this._collection.filter(configOrCallback, notify, force, data);
   }
 
   void supendSort() {
