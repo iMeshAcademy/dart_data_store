@@ -333,7 +333,7 @@ abstract class Store<T extends Model> extends EventEmitter {
       [dynamic config,
       bool fireEvent = true,
       bool force = false,
-      dynamic data = null]);
+      dynamic data]);
 
   /// API to perform sorting operation.
   void sort([dynamic config, bool fireEvent = true, bool force = false]);

@@ -169,11 +169,7 @@ mixin ModelCollection<T extends Model> {
   /// [force] - This parameter is used to perform force filtering. If supplied -
   /// filter operation will be performed without checking internal state.
   ///
-  filterBy(
-      [dynamic configOrCallback,
-      bool notify,
-      bool force,
-      dynamic data = null]) {
+  filterBy([dynamic configOrCallback, bool notify, bool force, dynamic data]) {
     this._collection.filter(configOrCallback, notify, force, data);
   }
 

@@ -70,7 +70,7 @@ abstract class Model extends CollectionEntry {
   /// Try to set the unique ID field or key for the model.
   /// It is not possible to set a different ID once the ID filed is initlaized and valid.
   set key(String value) {
-    if (key != null && key.trim().length > 0) {
+    if (key != null && key.trim().isNotEmpty) {
       return;
     }
 

@@ -77,10 +77,7 @@ class MemoryStore<T extends Model> extends Store<T> with ModelCollection<T> {
   /// [MemoryStore] uses [Filterable] interface logic for filtering.
   @override
   void filter(
-      [dynamic config,
-      bool fireEvent = true,
-      bool force,
-      dynamic data = null]) {
+      [dynamic config, bool fireEvent = true, bool force, dynamic data]) {
     filterBy(config, fireEvent, force, data);
   }
 
