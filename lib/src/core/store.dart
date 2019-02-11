@@ -108,7 +108,7 @@ abstract class Store<T extends Model> extends EventEmitter {
           });
         } catch (ex) {
           emit("error", this,
-              new DatabaseError("load", "Failed to load data.", null));
+              new CollectionError("load", "Failed to load data.", null));
           return false;
         }
       } else {
@@ -164,12 +164,12 @@ abstract class Store<T extends Model> extends EventEmitter {
           emit("load", this, data);
         } else {
           emit("error", this,
-              new DatabaseError("load", "Failed to load data", error));
+              new CollectionError("load", "Failed to load data", error));
         }
       });
     } catch (ex) {
       emit("error", this,
-          new DatabaseError("load", "Failed to load data", null));
+          new CollectionError("load", "Failed to load data", null));
       return; // Load failed for some reason, return empty list.
     }
   }
@@ -190,7 +190,7 @@ abstract class Store<T extends Model> extends EventEmitter {
         emit("add", this, record);
       } else {
         emit("error", this,
-            new DatabaseError("add", "Failed to add record", record));
+            new CollectionError("add", "Failed to add record", record));
       }
     });
   }
@@ -210,7 +210,7 @@ abstract class Store<T extends Model> extends EventEmitter {
         emit("remove", this, record);
       } else {
         emit("error", this,
-            new DatabaseError("remove", "Failed to remove record.", record));
+            new CollectionError("remove", "Failed to remove record.", record));
       }
     });
   }
@@ -231,7 +231,7 @@ abstract class Store<T extends Model> extends EventEmitter {
         emit(
             "error",
             this,
-            new DatabaseError(
+            new CollectionError(
                 "removeall", "Failed to remove all records.", null));
       }
     });
@@ -253,7 +253,7 @@ abstract class Store<T extends Model> extends EventEmitter {
         emit("update", this, record);
       } else {
         emit("error", this,
-            new DatabaseError("update", "Failed to update data", record));
+            new CollectionError("update", "Failed to update data", record));
       }
     });
   }
@@ -275,7 +275,7 @@ abstract class Store<T extends Model> extends EventEmitter {
         emit(
             "error",
             this,
-            new DatabaseError(
+            new CollectionError(
                 "commit", "Failed to commit record to store.", null));
       }
     });
@@ -287,6 +287,10 @@ abstract class Store<T extends Model> extends EventEmitter {
       return commit();
     });
   }
+
+  Future<List<Model>> getRecordsAsync();
+
+  List<Model> getRecords();
 
   @protected
   void sortInternal();
@@ -302,22 +306,22 @@ abstract class Store<T extends Model> extends EventEmitter {
   void sort([dynamic config, bool fireEvent = true, bool force = false]);
 
   @protected
-  void performAdd(Model record, DatabaseOperationCallback callback);
+  void performAdd(Model record, CollectionOperationCallback callback);
 
   @protected
-  void performRemove(Model record, DatabaseOperationCallback callback);
+  void performRemove(Model record, CollectionOperationCallback callback);
 
   @protected
-  void performRemoveAll(DatabaseOperationCallback callback);
+  void performRemoveAll(CollectionOperationCallback callback);
 
   @protected
-  void performUpdate(Model record, DatabaseOperationCallback callback);
+  void performUpdate(Model record, CollectionOperationCallback callback);
 
   @protected
-  void performLoad(DatabaseOperationCallback callback);
+  void performLoad(CollectionOperationCallback callback);
 
   @protected
-  void performCommit(DatabaseOperationCallback callback);
+  void performCommit(CollectionOperationCallback callback);
 
   bool get transactionInProgress => this._transactionCount > 0;
   bool get suspended => this._suspendEventCount > 0;

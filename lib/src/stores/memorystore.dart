@@ -12,18 +12,18 @@ class MemoryStore<T extends Model> extends Store<T> with ModelCollection<T> {
   bool get isLoaded => this._loaded;
 
   @override
-  void performAdd(record, DatabaseOperationCallback callback) {
+  void performAdd(record, CollectionOperationCallback callback) {
     record.key = "${record.modelName}__id__${this.allRecords.length}";
     addRecord(record, callback);
   }
 
   @override
-  void performCommit(DatabaseOperationCallback callback) {
+  void performCommit(CollectionOperationCallback callback) {
     callback(1, null);
   }
 
   @override
-  void performLoad(DatabaseOperationCallback callback) {
+  void performLoad(CollectionOperationCallback callback) {
     if (cached) {
       _loaded = true;
       callback(records, null);
@@ -33,17 +33,17 @@ class MemoryStore<T extends Model> extends Store<T> with ModelCollection<T> {
   }
 
   @override
-  void performRemove(record, DatabaseOperationCallback callback) {
+  void performRemove(record, CollectionOperationCallback callback) {
     removeRecord(record, callback);
   }
 
   @override
-  void performRemoveAll(DatabaseOperationCallback callback) {
+  void performRemoveAll(CollectionOperationCallback callback) {
     removeAllRecords(callback);
   }
 
   @override
-  void performUpdate(record, DatabaseOperationCallback callback) {
+  void performUpdate(record, CollectionOperationCallback callback) {
     updateRecord(record, callback);
   }
 
@@ -122,5 +122,25 @@ class MemoryStore<T extends Model> extends Store<T> with ModelCollection<T> {
   void sortInternal() {
     /// Internal sort API which will be called by store.
     /// Do nothing, as memory store already supports sortable collections.
+  }
+
+  @override
+  List<Model> getRecords() {
+    return this.records; // Assuming that store is already loaded.
+  }
+
+  @override
+  Future<List<Model>> getRecordsAsync() {
+    if (false == this.isLoaded) {
+      return this.loadAsync().then((res) {
+        return this.records;
+      }).catchError((err) {
+        return this.records;
+      });
+    } else {
+      return new Future(() {
+        return this.records;
+      });
+    }
   }
 }

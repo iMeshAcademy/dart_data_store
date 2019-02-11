@@ -1,3 +1,7 @@
+# 0.2.0
+- Updated store to provide sync and asyn APIs to retrieve records.
+# 0.1.9
+- Segregated the sortable and filterable framework code for data_store.
 # 0.1.8
 - Updated framework to accept filter parameters.
 - This is provided as an extension to the existing API.

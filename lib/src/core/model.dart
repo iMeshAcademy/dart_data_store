@@ -4,7 +4,7 @@ part of dart_store;
 // for details. All rights reserved. Use of this source code is governed by a
 // MIT-style license that can be found in the LICENSE file.
 
-abstract class Model {
+abstract class Model extends CollectionEntry {
   final String modelName;
 
   // ID field for the model. This is unique and will be used in key for the model.
@@ -27,7 +27,7 @@ abstract class Model {
   ///                 }
   ///
   ///
-  Model({@required this.modelName, @required this.config}) {
+  Model({@required this.modelName, @required this.config}) : super(config) {
     parseConfig();
   }
 
