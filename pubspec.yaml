@@ -1,7 +1,7 @@
 name: dart_store
 description: Simple, evented data-store framework for dart, which support event driven development.
 
-version: 0.2.0
+version: 0.2.1
 
 authors:
 - Ajeesh B Nair <ajeeshklr@gmail.com>
@@ -19,3 +19,5 @@ dependencies:
   async : ^2.0.8
   eventify : '>0.1.1 <9.0.0'
   mixed_collection: ^0.1.1
+dev_dependencies:
+    test: ^1.0.0

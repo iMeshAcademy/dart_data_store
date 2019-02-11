@@ -1,10 +1,7 @@
-# dart_data_store
-A store-model framework for dart lang. This can be used to implement a powerful mvc framework.
-
-# Sample usage is shown below. 
-### Refer documentation for further information.
-
-```Dart
+import 'package:dart_store/dart_store.dart';
+// Copyright (c) 2019, iMeshAcademy authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// MIT-style license that can be found in the LICENSE file.
 
 main() {
 // Initialize framework using configuration.
@@ -269,5 +266,3 @@ class App {
     return m;
   }
 }
-
-```

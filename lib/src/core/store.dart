@@ -29,6 +29,7 @@ abstract class Store<T extends Model> extends EventEmitter {
   String _modelName = "";
 
   /// Default contsructor for the base store, this is invoked from derived class.
+  ///
   /// A valid config can have the following format
   ///
   ///   {
@@ -49,6 +50,7 @@ abstract class Store<T extends Model> extends EventEmitter {
   ///     exactMatch: true,
   ///     rule  : beginswith|endswith|contains
   ///     caseSensitive: true
+  ///     "name" : "nameOfFilter"
   ///   }
   ///
   /// A sorter can have the following form
@@ -60,13 +62,22 @@ abstract class Store<T extends Model> extends EventEmitter {
   ///     caseSensitive: true|false
   ///   }
   ///
+  ///   or the below form
+  ///   {
+  ///    "property": "FirstName", // Sorter property name ( Case-sensitive)
+  ///    "direction": "asc",
+  ///    "comparer": stringComparer,
+  ///    "name": "sortByName", // A name for the sorter.
+  ///    "enabled": true // Make it to true to enable sorting using the sorter.
+  ///  },
   ///
-
+  ///
   Store(this.config) {
     // Parse configuration received.
     this._parseConfig();
   }
 
+  /// Private API for parsing store configuration.
   void _parseConfig() {
     // Check if config is a valid configuration.
     if (null != config) {
@@ -95,6 +106,7 @@ abstract class Store<T extends Model> extends EventEmitter {
     } // null != config;
   }
 
+  /// protected API for parsing configuration. This should be overriden by derived classes.
   @protected
   void parseConfigInternal();
 
@@ -130,10 +142,12 @@ abstract class Store<T extends Model> extends EventEmitter {
     }
   }
 
+  /// Suspend store from emitting any events.
   void suspendEvents() {
     ++this._suspendEventCount;
   }
 
+  /// Resume store to fire events.
   void resumeEvents() {
     --this._suspendEventCount;
     if (this._suspendEventCount <= 0) {
@@ -174,6 +188,7 @@ abstract class Store<T extends Model> extends EventEmitter {
     }
   }
 
+  /// Load store records async.
   Future loadAsync() {
     return new Future(() {
       return this.load();
@@ -288,48 +303,96 @@ abstract class Store<T extends Model> extends EventEmitter {
     });
   }
 
+  /// Abstract getter to retrieve records async.
+  /// For ex. a proxy store, which downloads data from server, could implement this API, and load data async from server.
+  /// Refer [MemoryStore] for a basic implementation of this API.
   Future<List<Model>> getRecordsAsync();
 
+  /// Get the list of records in the store.
   List<Model> getRecords();
 
+  /// Internal API to perform sorting.
+  /// Implementer of this API shall provide correct sorting logic.
+  ///
+  /// NOTE - This API is not implemented for [MemoryStore] as memory store supports sorting by default,
+  /// either when data is loaded, added or removed from collection.
+  ///  If your derived stores won't support sorting by default ( or doesn't extend [ModelCollection] mixin ), then provide sorting logic here.
+  ///
   @protected
   void sortInternal();
+
+  ///
+  /// Provide your store filtering logic here.
+  /// Not needed if your derived store extends [ModelCollection] mixin.
+  ///
   @protected
   void filterInternal();
 
+  /// API to perform filtering operation.
   void filter(
       [dynamic config,
       bool fireEvent = true,
       bool force = false,
       dynamic data = null]);
 
+  /// API to perform sorting operation.
   void sort([dynamic config, bool fireEvent = true, bool force = false]);
 
+  /// Business logic to add record to store/database/remote database.
   @protected
   void performAdd(Model record, CollectionOperationCallback callback);
 
+  /// Business logic to remove record from store/database/remote database.
   @protected
   void performRemove(Model record, CollectionOperationCallback callback);
 
+  /// Business logic to remove all records from store/database/remote database.
   @protected
   void performRemoveAll(CollectionOperationCallback callback);
 
+  /// Business logic to update record to store/database/remote database.
   @protected
   void performUpdate(Model record, CollectionOperationCallback callback);
 
+  /// Business logic to load records to store/database/remote database.
   @protected
   void performLoad(CollectionOperationCallback callback);
 
+  /// Business logic to commit  to store/database/remote database if it supprts transactional model.
   @protected
   void performCommit(CollectionOperationCallback callback);
 
+  /// Getter to identify if any transaction in progress.
   bool get transactionInProgress => this._transactionCount > 0;
+
+  /// Getter to identify if store is suspended from emitting events.
   bool get suspended => this._suspendEventCount > 0;
+
+  /// Returns true if store supports event queueing. Used when store is [suspended]. Not supported now.
   bool get queueingEnabled => this._supportsQueueing;
+
+  /// Return the model name associated with this store.
   String get modelName => this._modelName;
+
+  /// Return the storage associated with the store.
+  ///
+  /// [storage] is an instance of [Storage] class.
+  ///
+  /// Valid storages can be FileStorage, Databases like MongoDb, MySQl, Firebase etc.
+  ///
+  /// One shall provide appropriate wrapper for the above mentioned storage.
+  ///
   Storage get storage => this._storage;
+
+  /// Retrieve count of total records in the store.
   int get recordCount;
+
+  /// This is used to identify if store is loaded.
   bool get isLoaded;
+
+  /// This can be used to identify the filtered state of the store.
   bool get isFiltered;
+
+  /// This can be used to identify the sorted state of the store.
   bool get isSorted;
 }

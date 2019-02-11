@@ -3,7 +3,7 @@ part of dart_store;
 // for details. All rights reserved. Use of this source code is governed by a
 // MIT-style license that can be found in the LICENSE file.
 
-/// Create model using model information and Json instance provided.
+/// Create model using model information and Json config  provided.
 class ModelFactory {
   /// Static instance of singleton instance.
   static ModelFactory _factory = new ModelFactory._();

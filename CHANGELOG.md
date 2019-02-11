@@ -1,3 +1,6 @@
+# 0.2.1
+- Provided example and test cases for the store.
+- Readme updated.
 # 0.2.0
 - Updated store to provide sync and asyn APIs to retrieve records.
 # 0.1.9

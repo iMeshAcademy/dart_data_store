@@ -28,6 +28,9 @@ abstract class Model extends CollectionEntry {
   ///
   ///
   Model({@required this.modelName, @required this.config}) : super(config) {
+    if (this.fields.contains(idField) == false) {
+      this.fields.add(idField);
+    }
     parseConfig();
   }
 
@@ -35,12 +38,10 @@ abstract class Model extends CollectionEntry {
   void parseConfig() {
     if (null != config) {
       config.forEach((str, val) {
-        if (this.fields.contains(str)) {
-          if (str == idField) {
-            this.key = val;
-          } else {
-            setValue(str, val); // Set value using the defined API.
-          }
+        if (str == idField) {
+          this.key = val;
+        } else if (this.fields.contains(str)) {
+          setValue(str, val); // Set value using the defined API.
         } else {
           print("invalid field received in config");
         }
