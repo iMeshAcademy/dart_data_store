@@ -1,5 +1,7 @@
 library dart_store;
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:eventify/eventify.dart' show Event, EventEmitter;
 import 'package:mixed_collection/mixed_collection.dart';

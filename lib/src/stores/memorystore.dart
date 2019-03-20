@@ -77,7 +77,10 @@ class MemoryStore<T extends Model> extends Store<T> with ModelCollection<T> {
   /// [MemoryStore] uses [Filterable] interface logic for filtering.
   @override
   void filter(
-      [dynamic config, bool fireEvent = true, bool force, dynamic data]) {
+      [dynamic config,
+      bool fireEvent = true,
+      bool force = false,
+      dynamic data]) {
     filterBy(config, fireEvent, force, data);
   }
 
@@ -117,7 +120,7 @@ class MemoryStore<T extends Model> extends Store<T> with ModelCollection<T> {
   /// Sort the store.
   /// [MemoryStore] extends [Sortable.sortCollection] and uses the sort logic provided by it.
   @override
-  void sort([dynamic config, bool fireEvent = true, bool force]) {
+  void sort([dynamic config, bool fireEvent = true, bool force = false]) {
     // Not performing sorting as collection is auto sortable.
     super.sortCollection(config, fireEvent, force);
   }

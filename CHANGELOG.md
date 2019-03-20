@@ -1,4 +1,6 @@
-# 0.2.1
+# 0.2.3
+- Addressed analyzer warnings. 
+# 0.2.2
 - Addressed analyzer warnings and maintenance hint in pub.
 # 0.2.1
 - Provided example and test cases for the store.
